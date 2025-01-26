@@ -20,7 +20,7 @@ async def test_command(interaction: discord.Interaction):
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
 
-    task.start()
+    arashi_check.start()
 
     await bot.tree.sync()
 
@@ -33,22 +33,35 @@ async def on_message(message):
     text = message.content
     author = message.author
     author_name = author.name
-    author_id = author.id
 
-    for auth0r, vector in message_authors:
-        if auth0r == author_name:
-            vector.append
+    a = False
+
+    for i in range(len(message_authors)):
+        if message_authors[i][0] == author_name:
+            message_authors[i][1].append(message)
+            a = True
             break
-        else:
-            vector.append(text)
-            message_authors.append((author_name,vector))
+
+    if a == False:
+        list = []
+        list.append(message)
+        message_authors.append((author_name,list))
 
     await bot.process_commands(message)
 
-@tasks.loop(seconds=10)
-async def task():   
+@tasks.loop(seconds=5)
+async def arashi_check():
+    text = []
+    for i in range(len(message_authors)):
+        msg_list = message_authors[i][1]
+        if len(msg_list) > 5:
+            for k in msg_list:
+                await k.delete()
+
+            channnel = bot.get_channel(1332697911502438412)
+            await channnel.send("スパムを削除しました。")
 
     message_authors.clear()
-    print('test')
+    print('reset')
 
 bot.run(os.environ['TOKEN'])
