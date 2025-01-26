@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from discord import app_commands
 import asyncio
 import re
+import os
 
 intents = discord.Intents.default()
 intents.message_content = True 
@@ -11,7 +12,7 @@ bot = commands.Bot(command_prefix='/', intents=intents)
 
 message_authors = []
 
-@bot.tree.command(name="test",description="テストコマンドです。")
+@bot.tree.command(name="hello",description="テストコマンドです。")
 async def test_command(interaction: discord.Interaction):
     await interaction.response.send_message("てすと！",ephemeral=True)
 
@@ -43,14 +44,8 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-@bot.tree.command(name='hello', description='てすと用') 
-@app_commands.guilds(1301092560844099624)
-async def test(interaction: discord.Interaction,user: discord.User): 
-  await interaction.response.send_message('てすと!')
-
 @tasks.loop(seconds=10)
 async def task():   
     print('test')
 
-# botを実行
-bot.run('')
+bot.run(os.environ['TOKEN'])
