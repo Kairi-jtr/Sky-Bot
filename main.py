@@ -28,24 +28,24 @@ async def on_ready():
 async def on_message(message):
     if message.author.bot:
         return
-    
-    messages = []
 
     #メッセージ保存
+    text = message.content
     author = message.author
     author_name = author.name
     author_id = author.id
 
     for author, vector in message_authors:
-        if author == author_name:
-            author
-
-    messages.append((author_name,message.content,message))
+        
+        vector.append(text)
+        message_authors.append((author_name,vector))
 
     await bot.process_commands(message)
 
 @tasks.loop(seconds=10)
 async def task():   
+
+    message_authors.clear()
     print('test')
 
 bot.run(os.environ['TOKEN'])
