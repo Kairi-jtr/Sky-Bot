@@ -35,10 +35,13 @@ async def on_message(message):
     author_name = author.name
     author_id = author.id
 
-    for author, vector in message_authors:
-        
-        vector.append(text)
-        message_authors.append((author_name,vector))
+    for auth0r, vector in message_authors:
+        if auth0r == author_name:
+            vector.append
+            break
+        else:
+            vector.append(text)
+            message_authors.append((author_name,vector))
 
     await bot.process_commands(message)
 
