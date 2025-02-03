@@ -13,19 +13,26 @@ message_authors = []
 
 @bot.event
 async def on_ready():
-    print(f'{bot.user} has connected to Discord!')
-
     arashi_check.start()
 
-    await bot.tree.sync()
+    print(f'{bot.user} has connected to Discord!')
+    try:
+        synced = await bot.tree.sync()
+        print(f"同期されたコマンド数: {len(synced)}")
+    except Exception as e:
+        print(f"同期エラー: {e}")
+
 
 @bot.tree.command(name="rules",description="鯖の制限を決めるbot")
-async def decide_rules(interaction: discord.Interaction, text:str):
+async def decide_rules(interaction: discord.Interaction, max_pitch:int):
     channel = discord.utils.get(interaction.guild.channels, name='server-rules')
     if channel:
-        print('t')
+        await interaction.response.send_message('successful!')
+
+
+        channel.send()
     else:
-        await interaction.response.send_message('server_rulesが見つかりませんでした。チャンネルを作成してください。')
+        await interaction.response.send_message("'server_rules' channel not found.")
 
 @bot.event
 async def on_message(message):
@@ -37,8 +44,12 @@ async def on_message(message):
     author_name = author.name
 
     if message.content in 'discord.gg':
-        timeout_duration = timedelta(minutes=5)
-        await message.author.timeout(timeout_duration)
+        try:
+            timeout_duration = timedelta(minutes=5)
+            await message.author.timeout(timeout_duration)
+        except discord.errors.Forbidden:
+            print('許可がない')
+        
         message.delete()  
 
     a = False
@@ -61,8 +72,8 @@ async def arashi_check():
     for i in range(len(message_authors)):
         msg_list = message_authors[i][1]
         if len(msg_list) > 3:
-            #timeout_duration = timedelta(minutes=5)
-            #await msg_list[0].author.timeout(timeout_duration)
+            timeout_duration = timedelta(minutes=5)
+            await msg_list[0].author.timeout(timeout_duration)
 
             for msg in msg_list:
                 await msg.delete()            
