@@ -2,90 +2,48 @@ import discord
 from discord.ext import commands, tasks
 from discord import app_commands
 import os
-from datetime import timedelta
+from datetime import timedelta,datetime
 import threading
-
-intents = discord.Intents.default()
-intents.message_content = True 
-
-bot = commands.Bot(command_prefix='/', intents=intents)
-
-message_authors = []
-
-@bot.event
-async def on_ready():
-    arashi_check.start()
-
-    print(f'{bot.user} has connected to Discord!')
-    try:
-        synced = await bot.tree.sync()
-        print(f"同期されたコマンド数: {len(synced)}")
-    except Exception as e:
-        print(f"同期エラー: {e}")
+import sqlite3
 
 
-@bot.tree.command(name="rules",description="鯖の制限を決めるbot",guild=discord.Object(id=1301092560844099624))
-async def decide_rules(interaction: discord.Interaction, max_pitch:int,link:bool,description:str):
-    channel = discord.utils.get(interaction.guild.channels, name='server-rules')
-    if channel:
-        await interaction.response.send_message('successful!')
-        channel.send(f'# !この鯖では{max_pitch}回連投するとタイムアウトされます\n{'# !リンク送信は有効です'if link else '# リンク送信は無効です'}')
+class BotClient(discord.Client):
 
-        channel.send()
-    else:
-        await interaction.response.send_message("'server_rules' channel not found.")
+    async def on_ready(self):
+        self.tree = app_commands.CommandTree(self)
 
-@bot.event
-async def on_message(message):
-    if message.author.bot:
-        return
+        self.messages = []
+        await self.tree.sync()
 
-    #メッセージ保存
-    author = message.author
-    author_name = author.name
+    #log取得
+    async def on_message(self,msg):
+        if msg.author.bot:
+            return
 
-    if message.content in 'discord.gg':
-        try:
-            timeout_duration = timedelta(minutes=5)
-            await message.author.timeout(timeout_duration)
-        except discord.errors.Forbidden:
-            print('許可がない')
-        
-        message.delete()  
+        a = False
 
-    a = False
+        for i in range(len(self.messages)):
+            if self.messages[i][0] == msg.author.name:
+                now = datetime.now()
+                self.messages[i][1].append(msg.content)
+                self.messages[i][2].append(now)
+                a = True
 
-    for i in range(len(message_authors)):
-        if message_authors[i][0] == author_name:
-            message_authors[i][1].append(message)
-            a = True
-            break
+        if a == False:
+            msg_list = []
+            msg_list.append(msg.content)
 
-    if a == False:
-        list = []
-        list.append(message)
-        message_authors.append((author_name,list))
+            now = datetime.now()
+            date_list = []
+            date_list.append(now)
 
-    await bot.process_commands(message)
+            self.messages.append((msg.author.name, msg_list,date_list))
 
-@tasks.loop(seconds=3)
-async def arashi_check():
-    for i in range(len(message_authors)):
-        msg_list = message_authors[i][1]
-        if len(msg_list) > 3:
-            try:
-                timeout_duration = timedelta(minutes=5)
-                await msg_list[0].author.timeout(timeout_duration)
-            except discord.errors.Forbidden:
-                print('許可がない')
+        print(self.messages)
 
-        for msg in msg_list:
-            await msg.delete()
+if __name__ == '__main__':
+    intents = discord.Intents.default()
+    intents.message_content = True 
+    client = BotClient(intents=intents)
 
-        print('スパムを削除')
-
-    message_authors.clear()
-    print('reset')
-
-
-bot.run(os.environ['TOKEN'])
+    client.run(os.environ['TOKEN'])
