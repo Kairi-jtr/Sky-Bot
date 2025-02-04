@@ -1,13 +1,9 @@
 import discord
 from discord.ext import commands, tasks
 from discord import app_commands
-import os
 from datetime import timedelta,datetime
-import threading
-import sqlite3
 
-
-class BotClient(discord.Client):
+class Bot(discord.Client):
 
     async def on_ready(self):
         self.tree = app_commands.CommandTree(self)
@@ -40,10 +36,3 @@ class BotClient(discord.Client):
             self.messages.append((msg.author.name, msg_list,date_list))
 
         print(self.messages)
-
-if __name__ == '__main__':
-    intents = discord.Intents.default()
-    intents.message_content = True 
-    client = BotClient(intents=intents)
-
-    client.run(os.environ['TOKEN'])
