@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from discord import app_commands
 import os
 from datetime import timedelta
+import threading
 
 intents = discord.Intents.default()
 intents.message_content = True 
@@ -23,12 +24,12 @@ async def on_ready():
         print(f"同期エラー: {e}")
 
 
-@bot.tree.command(name="rules",description="鯖の制限を決めるbot")
-async def decide_rules(interaction: discord.Interaction, max_pitch:int):
+@bot.tree.command(name="rules",description="鯖の制限を決めるbot",guild=discord.Object(id=1301092560844099624))
+async def decide_rules(interaction: discord.Interaction, max_pitch:int,link:bool,description:str):
     channel = discord.utils.get(interaction.guild.channels, name='server-rules')
     if channel:
         await interaction.response.send_message('successful!')
-
+        channel.send(f'# !この鯖では{max_pitch}回連投するとタイムアウトされます\n{'# !リンク送信は有効です'if link else '# リンク送信は無効です'}')
 
         channel.send()
     else:
@@ -72,15 +73,19 @@ async def arashi_check():
     for i in range(len(message_authors)):
         msg_list = message_authors[i][1]
         if len(msg_list) > 3:
-            timeout_duration = timedelta(minutes=5)
-            await msg_list[0].author.timeout(timeout_duration)
+            try:
+                timeout_duration = timedelta(minutes=5)
+                await msg_list[0].author.timeout(timeout_duration)
+            except discord.errors.Forbidden:
+                print('許可がない')
 
-            for msg in msg_list:
-                await msg.delete()            
+        for msg in msg_list:
+            await msg.delete()
 
-            print('スパムを削除')
+        print('スパムを削除')
 
     message_authors.clear()
     print('reset')
+
 
 bot.run(os.environ['TOKEN'])
