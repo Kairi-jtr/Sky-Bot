@@ -5,7 +5,6 @@ from datetime import datetime
 import sqlite3
 
 class Bot(discord.Client):
-
     async def on_ready(self):
         self.tree = app_commands.CommandTree(self)
 
