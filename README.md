@@ -1,2 +1,2 @@
 # Sky-Bot
-kairisky作成のdiscord bot
+jtr作成のdiscord bot
