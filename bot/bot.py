@@ -34,5 +34,3 @@ class Bot(discord.Client):
             date_list.append(now)
 
             self.messages.append((msg.author.name, msg_list,date_list))
-
-        print(self.messages)
