@@ -3,13 +3,20 @@ from discord.ext import commands, tasks
 from discord import app_commands
 from datetime import datetime
 import sqlite3
+from commands import Commands
 
-class Bot(discord.Client):
+class Bot(commands.Bot):
+
+    def __init__(self, intents):
+        # Botの初期化。プレフィックスはスラッシュコマンドを使っているので不要
+        super().__init__(command_prefix="!", intents=intents)
+
+
     async def on_ready(self):
-        self.tree = app_commands.CommandTree(self)
-
         self.messages = []
-        await self.tree.sync()
+
+    async def setup_hook(self):
+        await self.add_cog(Commands(self))
 
     #log取得
     async def on_message(self,msg):
@@ -34,3 +41,4 @@ class Bot(discord.Client):
             date_list.append(now)
 
             self.messages.append((msg.author.name, msg_list,date_list))
+        print('test')
