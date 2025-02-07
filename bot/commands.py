@@ -7,9 +7,8 @@ class Commands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print('ログイン')
+        print('login')
 
     @discord.app_commands.command(name="hello", description="Say hello to the bot!")
     async def hello(self, interaction: discord.Interaction):
-        """/helloコマンドの処理"""
         await interaction.response.send_message("Hello! 👋")

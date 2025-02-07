@@ -1,6 +1,7 @@
 from bot import Bot
 import discord
 import os
+from datetime import datetime
 
 def main():
     intents = discord.Intents.default()
